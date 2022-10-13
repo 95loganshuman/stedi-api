@@ -1,0 +1,35 @@
+#this version of yaml
+apiVersion: apps/v1
+#the type of Kubernetes resource we are using
+#a deployment is when we run code on a server
+kind: Deployment
+#metadata is info related to the object we created in Kubernetes
+metadata:
+  #the name here is the name of the deployment
+  name: stedi-logan-shuman
+spec:
+  #Replicas refers to the number of pods we deploy
+  replicas: 1
+  #A selector is a route to my pod
+  selector:
+    #These are labels for my selector
+    matchLabels:
+    #App is a specific kind of label for my pod
+      app: stedi-logan-shuman
+  #The template describes all the features of my pod
+  template:
+    #metadata provides labels for my template
+    metadata:
+      labels:
+        app: stedi-logan-shuman
+  #the spec refers to the specification of my containers in my pod
+  spec:
+    #the containers can have one or more Docker containers in the pod
+        containers:
+        #the name of the container is specified below:
+          - name: stedi-logan-shuman
+            image: nginx
+
+         
+
+
