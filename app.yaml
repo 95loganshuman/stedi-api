@@ -55,35 +55,54 @@ spec:
 #Port defines the port to use when doing the HTTP request
                 port: 4567
 #initialDelaySeconds tells Kubernetes to wait before doing a request
-             initialDelaySeconds: 3
+             initialDelaySeconds: 10
 #periodSeconds tells Kubernetes how often to check health
              periodSeconds: 3
+
 ---
-#apiVersion tells kubernetes which version of yaml to use
-apiVersion: v1
-#kind tells kubernetes what kind of object to create
-kind: Service
-#metadata contains attributes about the object
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-#name is the name of the obejct we are creating
-  name: stedi-logan-shuman-loadbalancer
+  name: stedi-ingress-logan
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: stedi-public-logan
+    networking.gke.io/managed-certificates: stedi-certificate-logan
+    kubernetes.io/ingress.allow-http: "false"
+    # the below line wasn't there before
+    kubernetes.io/ingress.class: "gce"
 spec:
-#selector tells the network layer how to find the right pod
+# the below lines were here before
+
+#  backend:
+#    serviceName: stedi-nodeport
+#    servicePort: 80
+
+# the below lines weren't there before
+  defaultBackend:
+    service:
+      name: stedi-nodeport-logan
+      port:
+        number: 80
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: stedi-certificate-logan
+spec:
+  domains:
+    - loganshuman.cit262.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stedi-nodeport-logan
+spec:
   selector:
-#app tells the selector which app to send traffic to
     app: stedi-logan-shuman
-#type tells kubernetes the type of service we want
-#a LoadBalancer distributes network packets to one or more pods
-  type: LoadBalancer
-#ports are a list of ports the Load Balancer listens on
+  type: NodePort
   ports:
-#port is the port we want to listen on the network
     - port: 80
-#targetport is the port the pod listens on inside Kubernetes
       targetPort: 4567
-
-      
-
 
 
 
