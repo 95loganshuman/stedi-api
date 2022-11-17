@@ -29,6 +29,18 @@ spec:
         #the name of the container is specified below:
           - name: stedi-logan-shuman
             image: gcr.io/cit262-group-project/stedi-logan-shuman
+            env:
+              - name: REDIS_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: redis-secrets-dev-shuman
+                    key: REDIS_PASS
+              - name: REDIS_HOST
+                value: "redis-stedi-dev-shuman"
+              - name: REDIS_PORT
+                value: "6379"
+              - name: REDIS_DB
+                value: "0"
 #the ports is a list of tcp ports the pod listens on
             ports:
              - containerPort: 4567
@@ -103,6 +115,8 @@ spec:
   ports:
     - port: 80
       targetPort: 4567
+
+
 
 
 

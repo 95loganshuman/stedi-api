@@ -18,7 +18,7 @@ spec:
   selector:
     matchLabels:
       app: redis-stedi-dev-shuman  # has to match .spec.template.metadata.labels
-  serviceName: easy-rent-dev-redis
+  serviceName: redis-stedi-dev-shuman
   replicas: 1
   template:
     metadata:
@@ -26,8 +26,8 @@ spec:
         app: redis-stedi-dev-shuman  # has to match .spec.selector.matchLabels
     spec:
       containers:
-        - name: easy-rent-dev-redis
-          image: redis:3.2-alpine
+        - name: redis-stedi-dev-shuman
+          image: redis:7.0.5-alpine
           imagePullPolicy: Always
           args: ["--requirepass", "$(REDIS_PASS)", "--appendonly", "yes", "--save", "900", "1", "--save", "30", "2"]
           ports:
@@ -37,14 +37,14 @@ spec:
           - name: REDIS_PASS
             valueFrom:
               secretKeyRef:
-                name: redis-secrets-dev
+                name: redis-secrets-dev-shuman
                 key: REDIS_PASS
           volumeMounts:
-            - name: redis-dev-volume
+            - name: redis-dev-volume-shuman
               mountPath: /data
   volumeClaimTemplates:
   - metadata:
-      name: redis-dev-volume
+      name: redis-dev-volume-shuman
     spec:
       accessModes:
         - ReadWriteOnce
