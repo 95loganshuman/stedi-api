@@ -1,0 +1,84 @@
+#© 2022 Logan Shuman
+
+steps: 
+  # This step stops the stedi pod
+  - name: 'gcr.io/cloud-builders/kubectl'
+    id: Stop Pod
+    args:
+      - 'scale'
+      - 'deploy'
+      - 'stedi-logan-shuman'
+      - '--replicas=0'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
+
+      # This step deploys the application in Kubernetes
+  - name: 'gcr.io/cloud-builders/gke-deploy'
+    args:
+      - run
+      - --filename=app.yaml
+      - --image=gcr.io/$PROJECT_ID/stedi-logan-shuman:$SHORT_SHA
+      - --location=us-central1-c
+      - --cluster=cluster-1
+
+  # This step scales up the stedi pod
+  - name: 'gcr.io/cloud-builders/kubectl'
+    id: Start Pod
+    args:
+      - 'scale'
+      - 'deploy'
+      - 'stedi-logan-shuman'
+      - '--replicas=1'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
+  
+  # This step deploys the dev application in Kubernetes
+  - name: 'gcr.io/cloud-builders/gke-deploy'
+    id: Deploy
+    args:
+  - run
+  - --filename=manifest.yaml
+  - --image=gcr.io/$PROJECT_ID/_____________:latest
+  - --location=us-east1-b
+  - --output=/tmp/outputdev
+  - --cluster=cluster-1  
+
+# This step runs the ConstellationTests Image 
+# The PROJECT_ID variable is automatically
+# replaced by Cloud Build.
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Test
+    env:
+    - 'NODE_ENV=development'
+    args:
+    - 'run'
+    - 'gcr.io/$PROJECT_ID/constellationautotest:latest'
+    - 'npm'
+    - 'run'
+    - 'test'
+ # This step runs the ConstellationTests Image 
+ # The PROJECT_ID variable is automatically
+ # replaced by Cloud Build.
+  - name: 'gcr.io/cloud-builders/docker'
+    id: run
+    env:
+    - 'NODE_ENV=development'
+    args:
+    - 'run'
+    - 'gcr.io/$PROJECT_ID/constellationautotest:latest'
+    - 'npm'
+    - 'run'
+    - 'test-dev'
+
+
+# This step deploys the stage application in Kubernetes
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+    - builds
+    - submit
+    - --config
+    - cloudbuild-stage.yaml
+    - --substitutions
+    - _SHORT_SHA=$SHORT_SHA
