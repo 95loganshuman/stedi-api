@@ -55,7 +55,7 @@ steps:
     args:
       - run
       - --filename=app.yaml
-      - --image=gcr.io/$PROJECT_ID/stedi-logan-shuman:$SHORT_SHA
+      - --image=gcr.io/$PROJECT_ID/stedi:latest
       - --location=us-central1-c
       - --cluster=cluster-1
 
@@ -65,8 +65,16 @@ steps:
     args:
       - 'scale'
       - 'deploy'
+      - 'cloud-build-test.yaml'
       - 'stedi-logan-shuman'
       - '--replicas=1'
     env:
       - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
       - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
+# This step deploys the stage application in Kubernetes
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+     - builds
+     - submit
+     - --config
+     - cloudbuild-stage.yaml
